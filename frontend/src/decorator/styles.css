@@ -1,0 +1,448 @@
+*{
+    box-sizing: border-box;
+} 
+
+
+
+/*  Home Page 
+    Rod Long
+    @rodlong 
+    https://unsplash.com/photos/I79Pgmhmy5M  
+*/
+.bg1 {
+    width: 100%;
+    height:800px;
+    background-image: url('./pictures/bg1.jpg');
+    background-position: left top; 
+    background-repeat: no-repeat; 
+    background-size: cover;
+    display: grid;
+    align-content: center;
+    position:relative;
+}
+
+#caption {
+    position: absolute;
+    margin:50px;
+    color:white;
+    font-size: 50px;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+#caption-login {
+    position: absolute;
+    top: 100px;
+    margin:50px;
+    color:white;
+    font-size: 30px;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+#caption-logout {
+    position: absolute;
+    top: 100px;
+    margin:50px;
+    color:white;
+    font-size: 30px;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    display: grid;
+    grid-template-rows: auto auto;
+}
+
+#home-grid-container {
+    display: grid;
+    justify-content: center;
+    grid-row-gap: 30px;
+}
+
+#reservation, #deliver {
+    padding: 20px 80px;
+}
+
+.menu-bar {
+    margin-top: 100px;
+    padding:50px;
+    background-color: #f8f9fa;
+}
+
+#menu-caption {
+    text-align: center;
+    font-size: 30px;
+    color: black;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    padding: 30px;
+}
+
+.review {
+    margin-top: 100px;
+    padding:50px;
+    background-color: #f8f9fa;
+}
+
+.introduction {
+    margin-top: 100px;
+    padding:50px;
+    background-color: #f8f9fa;
+}
+
+.pagination-nav {
+    margin-top: 30px;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+}
+
+@media (max-width: 575px) {
+    .menu {
+        display:grid;
+        grid-template-rows: auto auto auto;
+        grid-row-gap: 5px;
+        justify-content: center;
+    }
+
+    #line {
+        display: grid;
+        grid-template-rows: auto auto;
+        grid-row-gap: 10px;
+    }
+}
+
+@media (min-width: 576px) {
+    .menu {
+        display:grid;
+        grid-template-columns: 100px 150px 100px;
+        grid-column-gap: 20px;
+        justify-content: center;
+    }
+
+    #reviews {
+        display: grid;
+        justify-content: center;
+        align-content: center;
+    }
+}
+
+
+
+/* Deliver Page 
+    Priscilla Du Preez
+    @priscilladupreez
+    https://unsplash.com/photos/G9Es_lGTZO8
+*/
+.bg3 {
+    width: 100%;
+    height: 400px;
+    background-image: url('./pictures/bg3.jpg');
+    background-position: center; 
+    background-repeat: no-repeat; 
+    background-size: cover;
+}
+
+#quantity {
+    display: grid;
+    grid-template-columns: 120px 30px 80px 30px;
+    justify-content: center;
+    grid-column-gap: 10px;
+}
+
+#shopping-cart {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.deliver-bar a:hover, .deliver-bar a {
+    margin: 20px;
+    color: black;
+    font-size: x-large;
+}
+
+@media (max-width: 991px) {
+    .cart {
+        padding: 10px;
+    }
+
+    .deliver-bar {
+        display: grid;
+        grid-template-rows: auto auto auto;
+        grid-row-gap: 20px;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 992px) {
+    .cart {
+        position: fixed;
+        top: 0px;
+        right: 0%;
+    }
+
+    .deliver-page {
+        display: grid;
+        grid-template-columns: 75% 25%;
+    }
+
+    .deliver-bar {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        grid-column-gap: 150px;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 1200px) {
+    .cart {
+        position: fixed;
+        top: 0px;
+        right: 0%;
+        padding: 50px;
+    }
+}
+
+
+
+/*  Reservation Page 
+    Brooke Lark
+    @brookelark
+    https://unsplash.com/photos/nTZOILVZuOg
+*/
+.bg2 {
+    width: 100%;
+    height: 800px;
+    background-image: url('./pictures/bg2.jpg');
+    background-position: center; 
+    background-repeat: no-repeat; 
+    background-size: cover;
+    display: grid;
+    align-content: center;
+}
+
+.reservation-bigger-form {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+
+.reservation-link {
+    margin-top:150px;
+    opacity:0.9;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+
+#reserve-bg {
+    background-color: #dddddc;
+    border-radius: 15px;
+    padding:30px;
+}
+
+@media (max-width: 767px) {
+    .reservation-form {
+        display: grid;
+        grid-template-rows: 50px 50px 50px 50px;
+        grid-row-gap:10px;
+    }
+}
+
+@media (min-width: 768px) {
+    .reservation-form {
+        display: grid;
+        grid-template-columns: 200px 200px 100px 200px;
+    }
+}
+
+.reservation-form input, .reservation-form select {
+    border: none;
+    /* outline: none; */
+}
+
+.reservation-book-form {
+    display: grid;
+    grid-template-rows: 50px 50px 50px 10px 10px;
+    grid-row-gap: 20px;
+    width: 20vw;
+}
+
+.book-bigger{
+    margin-top: 100px;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+}
+
+
+
+/* Reservation2 Page */
+.reservation2-grid {
+    display: grid;
+    width: 20vw;
+    grid-row-gap: 20px;
+    grid-template-rows: 50px 50px 50px 50px 50px 50px 50px;
+}
+
+.reservation2-bigger {
+    margin: 100px;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+}
+
+
+
+/* Register Page */
+.register-form {
+    display: grid;
+    grid-template-rows: 50px 50px 80px 50px 50px 50px 50px 50px 50px 50px 50px;
+    grid-row-gap: 20px;
+    width: 30vw;
+}
+
+.role {
+    display: grid;
+    align-content: center;
+    grid-template-columns: 20px 20px;
+}
+
+@media (max-width: 575px) {
+    .register-bigger {
+        margin-top: 100px;
+        margin-right: 40px;
+        display: grid;
+        align-content: center;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 576px) {
+    .register-bigger {
+        margin-top: 100px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 991px) {
+    .role-radio {
+        display: grid;
+        grid-template-rows: auto auto auto;
+    }
+}
+
+@media (min-width: 992px) {
+    .role-radio {
+        display: grid;
+        grid-template-columns: auto auto auto;
+    }
+}
+
+
+
+/* Login Page */
+.login-form {
+    display: grid;
+    grid-template-rows: 50px 50px 50px 50px;
+    grid-row-gap: 20px;
+    width: 30%;
+    justify-content: center;
+    align-content: center;
+}
+
+.login-bigger {
+    margin-top: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+/* Footer Page */
+.footer {
+    margin-top: 200px;
+    width: 100%;
+    padding-top: 80px;
+    padding-bottom: 50px;
+    text-align: center;
+    background-color: #343a40;
+    color: white;
+}
+
+
+
+/* Manager Page */
+.manager-nav {
+    display: grid;
+    grid-row-gap: 20px;
+    width: 20vw;
+    margin-top: 300px;
+}
+
+.manager-nav-bigger {
+    display: grid;
+    justify-content: center;
+    align-content: center;
+}
+
+
+
+/* Manager Menu Page */
+.menu-manager {
+    display: grid;
+    grid-template-rows: 50px 150px 50px 50px 50px;
+    grid-row-gap: 20px;
+    width: 40vw;
+}
+
+.menu-manager-bigger {
+    margin-top: 200px;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+}
+
+.menu-manager-radio {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-content: center;
+}
+
+.menu-radio {
+    display: grid;
+    grid-template-columns: 20px 20px;
+    justify-content: center;
+    align-content: center;
+}
+
+.head-grid, .body-grid {
+    display: grid;
+    grid-template-columns: 200px 500px 200px 500px 200px;
+}
+
+
+
+/* Manager Reservation Page */
+.reservation-manager-form {
+    display: grid;
+    grid-template-rows: 80px 80px 40px;
+    grid-row-gap: 30px;
+    width: 25vw;
+}
+
+.reservation-manager-bigger {
+    margin-top: 100px;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+}
+
+input[name='min_date'], input[name='max_date'] {
+    width: 100%;
+    height: 50px;
+}
+
+.reservation-manager-display {
+    margin-top: 200px;
+}
