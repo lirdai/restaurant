@@ -4,16 +4,41 @@ const uniqueValidator = require('mongoose-unique-validator')
 
 
 const DeliverSchema = new mongoose.Schema({
-    orderlists: {
-        type: Array,
-        default: []
-    },
+    orderlist: [
+        {
+            item: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Food",
+            },
+            quantity: {
+                type: Number,
+                required: true
+            },
+            price: {
+                type: mongoose.Schema.Types.Decimal128,
+                required: true,
+            }
+        }
+    ],
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         default: null
     },
+    courtier: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
     ordered: {
+        type: Boolean,
+        default: false
+    },
+    accepted: {
+        type: Boolean,
+        default: false
+    },
+    delivered: {
         type: Boolean,
         default: false
     },

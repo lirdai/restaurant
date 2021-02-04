@@ -79,12 +79,6 @@
     background-color: #f8f9fa;
 }
 
-.introduction {
-    margin-top: 100px;
-    padding:50px;
-    background-color: #f8f9fa;
-}
-
 .pagination-nav {
     margin-top: 30px;
     display: grid;
@@ -129,6 +123,31 @@
     @priscilladupreez
     https://unsplash.com/photos/G9Es_lGTZO8
 */
+@media (max-width: 576px) {
+    .form-checkout {
+        display: grid;
+        width: 80vw;
+        grid-row-gap: 20px;
+        grid-template-rows: 50px 50px 50px 50px 50px 50px 50px 50px;
+    }
+}
+
+@media (min-width: 577px) {
+    .form-checkout {
+        display: grid;
+        width: 30vw;
+        grid-row-gap: 20px;
+        grid-template-rows: 50px 50px 50px 50px 50px 50px 50px 50px;
+    }
+}
+
+.form-checkout-bigger {
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    margin-top: 200px;
+}
+
 .bg3 {
     width: 100%;
     height: 400px;
@@ -178,7 +197,7 @@
 
     .deliver-page {
         display: grid;
-        grid-template-columns: 75% 25%;
+        grid-template-columns: 70% 30%;
     }
 
     .deliver-bar {
@@ -194,8 +213,22 @@
         position: fixed;
         top: 0px;
         right: 0%;
-        padding: 50px;
+        padding: 30px;
     }
+}
+
+
+
+/* Delivering Page */
+.order-list {
+    margin-top: 20vh;
+    display: grid;
+    align-content: center;
+    justify-content: center;
+}
+
+.table-delivering {
+    width: 40vw;
 }
 
 
@@ -258,7 +291,7 @@
 
 .reservation-book-form {
     display: grid;
-    grid-template-rows: 50px 50px 50px 10px 10px;
+    grid-template-rows: 50px 50px 50px 50px 10px 10px;
     grid-row-gap: 20px;
     width: 20vw;
 }
@@ -272,12 +305,10 @@
 
 
 
-/* Reservation2 Page */
-.reservation2-grid {
-    display: grid;
-    width: 20vw;
-    grid-row-gap: 20px;
-    grid-template-rows: 50px 50px 50px 50px 50px 50px 50px;
+/* Deliver2 Page */
+.StripeElement {
+    border: 1px solid black;
+    padding: 10px;
 }
 
 .reservation2-bigger {
@@ -287,12 +318,30 @@
     align-content: center;
 }
 
+@media (max-width: 576px) {
+    .reservation2-grid {
+        display: grid;
+        width: 80vw;
+        grid-row-gap: 20px;
+        grid-template-rows: 50px 50px 50px 50px 50px 50px 50px 50px;
+    }
+}
+
+@media (min-width: 577px) {
+    .reservation2-grid {
+        display: grid;
+        width: 30vw;
+        grid-row-gap: 20px;
+        grid-template-rows: 50px 50px 50px 50px 50px 50px 50px 50px;
+    }
+}
+
 
 
 /* Register Page */
 .register-form {
     display: grid;
-    grid-template-rows: 50px 50px 80px 50px 50px 50px 50px 50px 50px 50px 50px;
+    grid-template-rows: 50px 50px 50px 80px 50px 50px 50px 50px 50px 50px 50px 50px;
     grid-row-gap: 20px;
     width: 30vw;
 }
@@ -360,14 +409,84 @@
 
 
 /* Footer Page */
-.footer {
-    margin-top: 200px;
-    width: 100%;
-    padding-top: 80px;
-    padding-bottom: 50px;
-    text-align: center;
-    background-color: #343a40;
-    color: white;
+@media (min-width: 1200px) {
+    .footer {
+        margin-top: 200px;
+        width: 100%;
+        padding-left: 150px;
+        padding-right: 150px;
+        padding-top: 80px;
+        padding-bottom: 50px;
+        text-align: center;
+        background-color: #343a40;
+        color: white;
+        display: grid;
+        grid-template-columns: auto auto;
+    }
+
+    .map {
+        width: 580px;
+        height: 300px;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .footer {
+        margin-top: 200px;
+        width: 100%;
+        padding-top: 80px;
+        padding-bottom: 50px;
+        text-align: center;
+        background-color: #343a40;
+        color: white;
+        display: grid;
+        grid-template-columns: auto auto;
+    }
+
+    .map {
+        width: 400px;
+        height: 300px;
+    }
+}
+
+@media (max-width: 991px) and (min-width: 576px) {
+    .footer {
+        margin-top: 200px;
+        width: 100%;
+        padding-top: 80px;
+        padding-bottom: 50px;
+        text-align: center;
+        background-color: #343a40;
+        color: white;
+        display: grid;
+        grid-template-rows: auto auto;
+        grid-row-gap: 50px;
+    }
+
+    .map {
+        width: 400px;
+        height: 300px;
+    }
+}
+
+@media (max-width: 575px) {
+    .footer {
+        margin-top: 200px;
+        width: 100%;
+        padding-top: 80px;
+        padding-bottom: 50px;
+        text-align: center;
+        background-color: #343a40;
+        color: white;
+        display: grid;
+        grid-template-rows: auto auto;
+        grid-row-gap: 50px;
+    }
+
+    .map {
+        width: 80%;
+        height: 200px;
+    }
 }
 
 

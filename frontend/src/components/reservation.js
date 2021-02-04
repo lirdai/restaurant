@@ -2,6 +2,8 @@ import React from 'react'
 import { Link } from "react-router-dom"
 import { useDispatch } from 'react-redux'
 import { gql, useMutation } from '@apollo/client'
+import Notification from './notification'
+import emailjs from 'emailjs-com'
 
 
 
@@ -25,10 +27,9 @@ mutation addReservation($reservedAt: String!, $time: String!, $customers: Int!, 
 const Reservation = (props) => {
   const dispatch = useDispatch()
   const [ addReservation ] = useMutation(ADD_RESERVATION)
-  // const min_date = localStorage.getItem("min_date")
-  // const max_date = localStorage.getItem("max_date")
-  
-  const handleSubmit = (event) => {
+
+
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
     const reservedAt = event.target.date.value
@@ -37,7 +38,20 @@ const Reservation = (props) => {
     const user = props.userID
 
     if (props.userID !== null) {
-      addReservation({ variables: { reservedAt, time, customers, user } })
+
+      try {
+        await addReservation({ variables: { reservedAt, time, customers, user } })
+      } catch (error) {
+        props.setError(error.message)
+      }
+     
+      emailjs
+        .sendForm('service_d7tzr1g', 'template_od0ql1o', event.target, 'user_uLpm5LanNOvUTRchkjsAS')
+        .then((result) => {
+            props.setSuccess("Book successfully!")
+        }, (error) => {
+            props.setError(error.text);
+        })
     } else {
       dispatch({
         type: 'BOOK_TIME',
@@ -63,9 +77,11 @@ const Reservation = (props) => {
       <div className="bg2">
         <div className="reservation-bigger-form">
           <div id="reserve-bg">
+            <Notification errorMessage={props.errorMessage} successMessage={props.successMessage} />
             <form className='reservation-form' onSubmit={handleSubmit}>
-              <input type="date" name='date' />
-              <select name='time'>
+              <input type="hidden" name='email' value={props.email ?props.email :''} />
+              <input type="date" name='date' required />
+              <select name='time' required>
                 <option value="9:00 a.m.">9:00 a.m.</option>
                 <option value="10:30 a.m.">10:30 a.m.</option>
                 <option value="12:00 p.m.">12:00 p.m.</option>
@@ -74,7 +90,7 @@ const Reservation = (props) => {
                 <option value="4:30 p.m.">4:30 p.m.</option>
                 <option value="6:00 p.m.">6:00 p.m.</option>
               </select>
-              <input type="number" min="1" max="6" placeholder="customer(s)" name='customers' />
+              <input type="number" min="1" max="6" placeholder="customer(s)" name='customers' required />
               <input className='btn btn-danger py-3 px-5' type="submit" value="Reserve Now" />
             </form>
           </div>

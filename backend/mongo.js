@@ -3,8 +3,9 @@ const mongoose = require('mongoose')
 const { ApolloServer, UserInputError, gql } = require('apollo-server')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+require('dotenv').config()
+const Stripe = require('stripe')
 const { PubSub } = require('apollo-server')
-const pubsub = new PubSub()
 
 // File
 const Food = require('./models/menu')
@@ -21,9 +22,12 @@ if (process.argv.length < 4) {
 }
 
 
+const pubsub = new PubSub()
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+
 
 const password = process.argv[2]
-const url = `mongodb+srv://restaurant:${password}@cluster0.wtbvi.mongodb.net/<dbname>?retryWrites=true&w=majority`
+const url = `mongodb+srv://restaurant:${password}@cluster0.wtbvi.mongodb.net/restaurant?retryWrites=true&w=majority`
 const secret_key = process.argv[3]
 const JWT_SECRET = `${secret_key}`
 
@@ -46,15 +50,20 @@ const typeDefs = gql`
     username: String!
     id: String!
     role: String!
+    email: String!
+  }
+
+  type StripeSecretKey {
+    clientSecret: String!
   }
 
   type UserInfo {
-    email: String!
-    phone: String!
-    street: String!
+    email: String
+    phone: String
+    street: String
     street2: String
-    city: String!
-    postal_code: String!
+    city: String
+    postal_code: String
   }
 
   type User {
@@ -69,6 +78,18 @@ const typeDefs = gql`
     id: ID!
   }
 
+  input OrderEntry {
+    item: ID!
+    quantity: Int!
+    price: Float!
+  }
+
+  type OrderItem {
+    item: Food!
+    quantity: Int!
+    price: Float!
+  }
+
   type Food {
     name: String!
     description: String!
@@ -78,12 +99,15 @@ const typeDefs = gql`
   }
 
   type Deliver {
-    orderlists: [Food]!
+    orderlist: [OrderItem]!
     purchase_date: String!
     price: Float!
     ordered: Boolean!
+    accepted: Boolean!
+    delivered: Boolean!
     id: ID!
     user: User
+    courtier: User
     info: UserInfo
   }
 
@@ -103,7 +127,6 @@ const typeDefs = gql`
     title: String!
     comment: String!
     date: String!
-    likes: Int!
     id: ID!
   }
 
@@ -112,6 +135,8 @@ const typeDefs = gql`
     findSameKindFood(category: String!): [Food!]!
     findAllReviews: [Review!]!
     allReservations: [Reservation!]!
+    allDelivers: [Deliver!]!
+    findOneDeliver(id: ID!): [Deliver!]!
     me: User
   }
 
@@ -146,21 +171,28 @@ const typeDefs = gql`
       check: Boolean!
     ): Reservation
 
-    addDeliver(
+    createDeliver(
+      orderlist: [OrderEntry]!
+      price: Float!
+      ordered: Boolean!
       user: ID
+      email: String
+      phone: String
+      street: String
+      street2: String
+      city: String
+      postal_code: String
     ): Deliver
 
-    updateDeliver(
+    updateDeliverAccepted(
       id: ID!
-      orderlists: [ID]!
-      user: ID
-      price: Float!
-      email: String,
-      phone: String,
-      street: String,
-      street2: String,
-      city: String,
-      postal_code: String
+      courtier: ID!
+      accepted: Boolean!
+    ): Deliver
+
+    updateDeliverDelivered(
+      id: ID!
+      delivered: Boolean!
     ): Deliver
 
     addReview(
@@ -186,10 +218,17 @@ const typeDefs = gql`
       username: String!
       password: String!
     ): Token
+
+    stripeCharge(
+      amount: Float!
+    ): StripeSecretKey
   }
 
   type Subscription {
     reviewAdded: Review!
+    ordered: Deliver!
+    accepted: Deliver!
+    delivered: Deliver!
   }
 `
 
@@ -197,14 +236,30 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    allFood: (root, args) => Food.find({}),
+    allFood: () => Food.find({}),
     findSameKindFood: (root, args) => Food.find({ category: args.category }),
-    findAllReviews: (root, args) => Review.find({}),
-    allReservations: (root, args) => Reservation.find({}).sort({ reservedAt: -1 }),
+    findAllReviews: () => Review.find({}),
+    allReservations: () => Reservation.find({}).sort({ reservedAt: -1 }),
+    allDelivers: () => Deliver.find({}),
+    findOneDeliver: (root, args) => Deliver.find({ _id: args.id }),
     me: (root, args, context) => context.currentUser
   }, 
+  OrderItem: {
+    async item(parent) {
+      return await Food.findById(parent.item)
+    }
+  },
   Food: { price: (root) => parseFloat(root.price) },
   Deliver: {
+    orderlist: (root) => {
+      return root.orderlist.map(orderItem => {
+        return {
+          item: orderItem.item,
+          quantity: orderItem.quantity,
+          price: parseFloat(orderItem.price)
+        }
+      })
+    },
     price: (root) => parseFloat(root.price),
     info: (root) => {
       return {
@@ -219,9 +274,9 @@ const resolvers = {
     async user(parent) {
       return await User.findById(parent.user)
     }, 
-    async orderlists(parent) {
-      return await parent.orderlists.map(ID => Food.findById(ID))
-    }
+    async courtier(parent) {
+      return await User.findById(parent.courtier)
+    }, 
   },
   Reservation: {
     async user(parent) {
@@ -261,25 +316,41 @@ const resolvers = {
       try {
         await food.save()
       } catch (error) {
-        throw new UserInputError(error.message, {
-          invalidArgs: args,
-        })
+        throw new UserInputError(error.message)
       }
       
       return food
     },
     updateFoodPrice: async (root, args) => {
-      const food = Food.findById(args.id)
+      const food = await Food.findById(args.id)
 
       const foodSaved = {
         price: args.price
       }
 
-      await Food.updateOne({_id: args.id}, foodSaved)
+      try {
+        await Food.updateOne({_id: args.id}, foodSaved)
+      } catch (error) {
+        throw new UserInputError(error.message)
+      }
+
+      const update = {
+        ...food._doc,
+        id: food._id,
+        price: args.price
+      }
+
+      return update
     },
     deleteFood: async (root, args) => {
       const food = await Food.findById(args.id)
-      await Food.deleteOne({ _id: args.id })
+
+      try {
+        await Food.deleteOne({ _id: args.id })
+      } catch (error) {
+        throw new UserInputError(error.message)
+      }
+
       return food
     },
     addReservation: async (root, args) => {
@@ -292,9 +363,7 @@ const resolvers = {
           loggedUser.reservations_history = loggedUser.reservations_history.concat(reservationSaved._id)
           await loggedUser.save()
         } catch (error) {
-          throw new UserInputError(error.message, {
-            invalidArgs: args,
-          })
+          throw new UserInputError(error.message)
         }
         
         return reservationSaved
@@ -304,22 +373,36 @@ const resolvers = {
         try {
           await reservation.save()
         } catch (error) {
-          throw new UserInputError(error.message, {
-            invalidArgs: args,
-          })
+          throw new UserInputError(error.message)
         }
         
         return reservation
       }  
     },
     updateReservationCheck: async (root, args) => {
+      const reservation = await Reservation.findById(args.id)
+
       const reservationSaved = {
         check: args.check
       }
 
-      return await Reservation.updateOne({_id: args.id}, reservationSaved)
+      try {
+        await Reservation.updateOne({_id: args.id}, reservationSaved)
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args,
+        })
+      }
+
+      const update = {
+        ...reservation._doc,
+        id: reservation._id,
+        check: args.check
+      }
+
+      return update
     }, 
-    addDeliver: async (root, args) => {
+    createDeliver: async (root, args) => {
       if (args.user !== undefined) {
         let loggedUser = await User.findById(args.user)
         const deliver = new Deliver({ ...args, user: loggedUser._id })
@@ -334,7 +417,12 @@ const resolvers = {
           })
         }
         
-        return deliverSaved
+        const deliverUpdated = {
+          ...deliverSaved._doc,
+          id: deliverSaved._id
+        } 
+
+        return deliverUpdated
       } else {
         const deliver = new Deliver({ ...args })
 
@@ -345,36 +433,66 @@ const resolvers = {
             invalidArgs: args,
           })
         }
-        
-        return deliver
+
+        const deliverUpdated = {
+          ...deliver._doc,
+          id: deliver._id
+        }
+
+        return deliverUpdated
       }
     },
-    updateDeliver: async (root, args) => {
+    updateDeliverAccepted: async (root, args) => {
       const deliver = await Deliver.findById(args.id)
 
-      if (deliver.user !== null) {
-        const deliverSaved = {
-          ordered: true,
-          price: args.price,
-          orderlists: deliver.orderlists.concat(args.orderlists)
-        }
-
-        await Deliver.updateOne({_id: args.id}, deliverSaved)
-      } else {
-        const deliverSaved = {
-            ordered: true,
-            price: args.price,
-            orderlists: deliver.orderlists.concat(args.orderlists),
-            email: args.email,
-            phone: args.phone,
-            street: args.street,
-            street2: args.street2,
-            city: args.city,
-            postal_code: args.postal_code
-        }
-  
-        await Deliver.updateOne({_id: args.id}, deliverSaved)
+      const deliverSaved = {
+        courtier: args.courtier,
+        accepted: args.accepted
       }
+
+      try {
+        await Deliver.updateOne({_id: args.id}, deliverSaved)
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args,
+        })
+      }
+
+      const update = {
+        ...deliver._doc,
+        id: deliver._id,
+        courtier: args.courtier,
+        accepted: args.accepted
+      }
+
+      pubsub.publish("ACCEPTED", { accepted: update })
+
+      return update
+    },
+    updateDeliverDelivered: async (root, args) => {
+      const deliver = await Deliver.findById(args.id)
+
+      const deliverSaved = {
+        delivered: args.delivered
+      }
+
+      try {
+        await Deliver.updateOne({_id: args.id}, deliverSaved)
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args,
+        })
+      }
+
+      const update = {
+        ...deliver._doc,
+        id: deliver._id,
+        delivered: args.delivered
+      }
+
+      pubsub.publish("DELIVERED", { delivered: update })
+
+      return update
     },
     addReview: async (root, args) => {
       let loggedUser = await User.findById(args.user)
@@ -400,6 +518,12 @@ const resolvers = {
       return reviewSaved
     },
     createUser: async (root, args) => {
+      const username = await User.findOne({ username: args.username })
+
+      if (username) {
+        throw new UserInputError("username must be unique")
+      }
+
       const saltRounds = 10
       const passwordHash = await bcrypt.hash(args.passwordHash, saltRounds)
 
@@ -408,9 +532,7 @@ const resolvers = {
       try {
         await user.save()
       } catch (error) {
-        throw new UserInputError(error.message, {
-          invalidArgs: args,
-        })
+        throw new UserInputError(error.message)
       }
       
       return user
@@ -430,13 +552,41 @@ const resolvers = {
         id: user._id,
       }
   
-      return { value: jwt.sign(userForToken, JWT_SECRET), username: user.username, id: user._id, role: user.role }
+      return { value: jwt.sign(userForToken, JWT_SECRET), 
+                username: user.username, 
+                id: user._id, 
+                role: user.role ,
+                email: user.email
+              }
     },
+    stripeCharge: async (root, args) => {
+      const amount = args.amount
+
+      try {
+        var paymentIntent = await stripe.paymentIntents.create({
+          amount, 
+          currency: "cad"
+        })
+      } catch (error) {
+        throw new UserInputError(error.message)
+      }
+      
+      return { clientSecret: paymentIntent.client_secret }
+    }
   }, 
   Subscription: {
     reviewAdded: {
       subscribe: () => pubsub.asyncIterator(['REVIEW_ADDED'])
     },
+    ordered: {
+      subscribe: () => pubsub.asyncIterator(['ORDERED'])
+    },
+    accepted: {
+      subscribe: () => pubsub.asyncIterator(['ACCEPTED'])
+    },
+    delivered: {
+      subscribe: () => pubsub.asyncIterator(['DELIVERED'])
+    }
   },
 }
 

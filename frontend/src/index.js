@@ -11,6 +11,8 @@ import { WebSocketLink } from '@apollo/client/link/ws'
 import { createStore, combineReducers } from 'redux'
 import { Provider } from 'react-redux'
 import { setContext } from 'apollo-link-context'
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements } from '@stripe/react-stripe-js'
 
 // Static
 import './decorator/styles.css'
@@ -27,12 +29,13 @@ import DeliverSecond from './components/deliver2'
 import Login from './components/login'
 import Register from './components/register'
 import Checkout from './components/checkout'
+import Delivering from './components/delivering'
 import DeliverManager from './components/delivermanager'
 import ReservationManager from './components/reservationmanager'
 import MenuManager from './components/menumanager'
 import bookReducer from './reducer/book'
 import orderReducer from './reducer/order'
-import deliverIDReducer from './reducer/deliverid'
+import deliveridReducer from './reducer/deliverid'
 
 
 
@@ -69,25 +72,49 @@ const client = new ApolloClient({
   link: splitLink
 })
 
+
+
 const reducer = combineReducers({
   books: bookReducer,
   orders: orderReducer,
-  deliverid: deliverIDReducer,
+  deliverid: deliveridReducer
 })
 
 const store = createStore(reducer)
 
 
 
+const stripePromise = loadStripe("pk_test_jfeD0SXgvoZ0qfB3nizgQGW500xwK6q5lo")
+
+
+
 const App = () => {
   const [ reserve, setReserve ] = useState(false)
-  const [ deliver, setDeliver ] = useState(false)
-  const [ checkout, setCheckout ] = useState(false)
   const [ register, setRegister ] = useState(false)
+  const [ errorMessage, setErrorMessage ] = useState(null)
+  const [ successMessage, setSuccessMessage ] = useState(null)
   const [ username, setUsername ] = useState(localStorage.getItem('username'))
   const [ token, setToken ] = useState(localStorage.getItem('token'))
   const [ userID, setUserID ] = useState(localStorage.getItem('userID'))
   const [ role, setRole ] = useState(localStorage.getItem('role'))
+  const [ email, setEmail ] = useState(localStorage.getItem('email'))
+
+  
+  //Notification
+  const error_notify = (message) => {
+    setErrorMessage(message)
+    setTimeout(() => {
+      setErrorMessage(null)
+    }, 10000)
+  }
+
+  const success_notify = (message) => {
+    setSuccessMessage(message)
+    setTimeout(() => {
+      setSuccessMessage(null)
+    }, 10000)
+  }
+
 
   return (
     <div>
@@ -128,15 +155,17 @@ const App = () => {
                 : <Redirect to='/' />
               }
             </Route>
-            
-            <Route exact path="/checkout">
-                <Checkout /> 
-            </Route>
 
             <Route exact path="/register">
                 {register
                     ? <Redirect to="/login" />
-                    : <Register setRegister={setRegister} />
+                    : <Register 
+                        setRegister={setRegister} 
+                        setError={error_notify}
+                        setSuccess={success_notify}
+                        errorMessage={errorMessage}
+                        successMessage={successMessage}
+                      />
                 }
             </Route>
 
@@ -152,15 +181,24 @@ const App = () => {
                       setUsername={setUsername} 
                       setUserID={setUserID} 
                       setRole={setRole} 
+                      setEmail={setEmail}
                       setReserve={setReserve}
-                      setDeliver={setDeliver}
-                      setCheckout={setCheckout}
+                      setError={error_notify}
+                      setSuccess={success_notify}
+                      errorMessage={errorMessage}
+                      successMessage={successMessage}
                     />
                 }
             </Route>
 
             <Route exact path="/reservation/signup">
-                <ReservationSecond />
+                <ReservationSecond 
+                  setReserve={setReserve} 
+                  setError={error_notify}
+                  setSuccess={success_notify}
+                  errorMessage={errorMessage}
+                  successMessage={successMessage}
+                />
             </Route>
 
             <Route exact path="/reservation">
@@ -169,22 +207,34 @@ const App = () => {
                   : <Reservation 
                       setReserve={setReserve} 
                       userID={userID} 
+                      email={email}
+                      setError={error_notify}
+                      setSuccess={success_notify}
+                      errorMessage={errorMessage}
+                      successMessage={successMessage}
                     />
                 }
             </Route>
 
+            <Route exact path="/delivering">
+              <Delivering 
+                setError={error_notify}
+                setSuccess={success_notify}
+                errorMessage={errorMessage}
+                successMessage={successMessage}
+              /> 
+            </Route>
+
+            <Route exact path="/checkout">
+              <Checkout userID={userID} /> 
+            </Route>
+
             <Route exact path="/deliver/signup">
-                <DeliverSecond setDeliver={setDeliver} />
+              <DeliverSecond />
             </Route>
 
             <Route exact path="/deliver">
-                {!deliver && !checkout && <Deliver 
-                    userID={userID} 
-                    setDeliver={setDeliver} 
-                    setCheckout={setCheckout}
-                />}
-                {deliver && !checkout && <Redirect to='/deliver/signup' />}
-                {!deliver && checkout && <Redirect to='/checkout' />}
+              <Deliver userID={userID} />
             </Route>
 
             <Route exact path="/">
@@ -213,7 +263,9 @@ const App = () => {
 ReactDOM.render(
   <ApolloProvider client={client}>
     <Provider store={store}>
-      <App />
+      <Elements stripe={stripePromise}>
+        <App />
+      </Elements>
     </Provider>
   </ApolloProvider>, document.getElementById('root')
 )

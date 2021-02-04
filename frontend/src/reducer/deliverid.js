@@ -1,4 +1,4 @@
-const deliverIDReducer = (state = '', action) => {
+const deliveridReducer = (state = null, action) => {
     switch(action.type) {
         case 'DELIVER_ID':
             return action.data
@@ -9,4 +9,4 @@ const deliverIDReducer = (state = '', action) => {
 
 
 
-export default deliverIDReducer
+export default deliveridReducer

@@ -16,17 +16,14 @@ const OrderListSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Decimal128,
         required: true,
     },
-    purchase_date: {
-        type: Date, 
-        default: Date.now
-    },
     deliver: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Deliver",
+        default: null
     }
 })
 
 
 
 OrderListSchema.plugin(uniqueValidator)
-module.exports = mongoose.model('OrderList', OrderListSchema)
+module.exports = mongoose.model('OrderItem', OrderListSchema)

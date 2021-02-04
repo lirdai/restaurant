@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
-import { gql, useMutation } from '@apollo/client'
 import { useDispatch } from 'react-redux'
 import foodPic from '../decorator/pictures/food.jpg'
 import coffeePic from '../decorator/pictures/coffee.jpg'
@@ -8,57 +7,7 @@ import dessertPic from '../decorator/pictures/dessert.jpg'
 
 
 
-const ADD_DELIVER = gql`
-mutation addDeliver($user: ID) {
-    addDeliver(
-        user: $user
-    ) {
-        id
-    }
-}
-`
-
-
-
-const Example = ({ show, handleClose, quantity, setQuantity, userID, food }) => {
-    const [ first, setFirst ] = useState(true)
-
-    const dispatch = useDispatch()
-    const [ addDeliver, DeliverResult ] = useMutation(ADD_DELIVER)
-   
-    useEffect(() => {
-        if (DeliverResult.data !== undefined ) {
-            dispatch({
-                type: 'DELIVER_ID',
-                data: DeliverResult.data.addDeliver.id
-            })
-        }
-    }, [dispatch, DeliverResult.data])
-
-    const handleSubmit = (event) => {
-        event.preventDefault()
-        
-        if (first === true) {
-            if (userID === null) {
-                addDeliver({ variables: {} })
-            } else {
-                const user = userID
-                addDeliver({ variables: { user } })
-            }
-            setFirst(false)
-        }
-        
-        dispatch({
-            type: 'ORDER_FOOD',
-            data: {
-                item: event.target.item.value,
-                name: event.target.name.value,
-                quantity: parseInt(event.target.quantity.value),
-                price: parseFloat(event.target.price.value).toFixed(2)  
-            }
-        })
-    }       
-
+const Example = ({ show, handleClose, quantity, setQuantity, food, handleSubmit }) => {
     const handlePlusQuantity = () => {
         setQuantity(quantity + 1)
     }
@@ -93,7 +42,7 @@ const Example = ({ show, handleClose, quantity, setQuantity, userID, food }) => 
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>Close</Button>
+                    <Button variant="secondary" type='submit' onClick={handleClose}>Close</Button>
                     <input type="submit" value="Save Changes" />
                 </Modal.Footer>
                 </form>
@@ -104,7 +53,23 @@ const Example = ({ show, handleClose, quantity, setQuantity, userID, food }) => 
 
 
 
-const DisplayPartFood = ({menu, category, userID, picture}) => {
+const DisplayPartFood = ({menu, category, picture}) => {
+    const dispatch = useDispatch()
+
+    const handleSubmit = (event) => {
+        event.preventDefault()
+        
+        dispatch({
+            type: 'ORDER_FOOD',
+            data: {
+                item: event.target.item.value,
+                name: event.target.name.value,
+                quantity: parseInt(event.target.quantity.value),
+                price: parseFloat(event.target.price.value).toFixed(2)  
+            }
+        })
+    }    
+
     const [ quantity, setQuantity ] = useState(1)
     const [show, setShow] = useState(menu.reduce((result, food) => {
         result[food.id] = false
@@ -167,8 +132,8 @@ const DisplayPartFood = ({menu, category, userID, picture}) => {
                                         handleClose={handleClose(food.id)} 
                                         quantity={quantity} 
                                         setQuantity={setQuantity} 
-                                        userID={userID} 
                                         food={food}
+                                        handleSubmit={handleSubmit}
                                     />
 
                                     <p className="card-text" onClick={handleShow(food.id)}>{food.description}</p>

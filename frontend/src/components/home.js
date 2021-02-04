@@ -22,7 +22,6 @@ const FIND_ALL_REVIEWS = gql`
   query {
     findAllReviews{
       id
-      likes
       title
       comment
       date
@@ -55,7 +54,6 @@ const REVIEW_ADDED = gql`
       title
       comment
       date
-      likes
       id
     }
   }
@@ -238,7 +236,7 @@ const Home = (props) => {
                     <h5>{review.title}</h5> 
                     <p>Created by {review.user.username}</p>
                     <p className='pl-3'>{review.comment}</p>
-                    <p id='line'>{new Date(parseInt(review.date)).toLocaleString()}<span className='pl-sm-5'><i className="fas fa-heart"></i> {review.likes}</span></p>
+                    <p id='line'>{new Date(parseInt(review.date)).toLocaleString()}</p>
                   </div>
                 )}
             </div>
@@ -257,15 +255,6 @@ const Home = (props) => {
           totalPosts = {reviews.length}
           Paginate = {Paginate}
         />
-      </div>
-
-
-      {/* Introduction: map/pictures....       */}
-      <div className='introduction'>
-        {/* Map */}
-        <div className='map'></div>
-        {/* Business Hours */}
-        <div className='hours'></div>
       </div>
     </div>
   )
