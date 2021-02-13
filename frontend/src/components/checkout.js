@@ -74,7 +74,7 @@ const Checkout = (props) => {
     
             setPaymentMethodReq(request)
         } catch (error) {
-            console.log(error)
+            // console.log(error)
         }
         
         setTimeout(() => history.push('/delivering'), 5000)

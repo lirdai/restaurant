@@ -135,7 +135,7 @@
 @media (min-width: 577px) {
     .form-checkout {
         display: grid;
-        width: 30vw;
+        width: 50vw;
         grid-row-gap: 20px;
         grid-template-rows: 50px 50px 50px 50px 50px 50px 50px 50px;
     }
@@ -330,7 +330,7 @@
 @media (min-width: 577px) {
     .reservation2-grid {
         display: grid;
-        width: 30vw;
+        width: 50vw;
         grid-row-gap: 20px;
         grid-template-rows: 50px 50px 50px 50px 50px 50px 50px 50px;
     }

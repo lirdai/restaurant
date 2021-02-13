@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "set NODE_ENV=production && node mongo.js",
+    "dev": "nodemon mongo.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Daisy",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "dependencies": {
+    "apollo-server": "^2.19.0",
+    "bcrypt": "^5.0.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "graphql": "^15.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.10.15",
+    "mongoose-unique-validator": "^2.0.3",
+    "stripe": "^8.129.0"
+  }
+}

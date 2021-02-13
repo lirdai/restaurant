@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from "react-router-dom"
 import { gql, useLazyQuery, useQuery, useMutation, useSubscription } from '@apollo/client'
-import { useApolloClient } from '@apollo/client';
+import { useApolloClient } from '@apollo/client'
 import { Button, Modal } from 'react-bootstrap'
 import Pagination from './pagination'
 
@@ -149,12 +149,14 @@ const Home = (props) => {
   // useEffect
   useEffect(() => {
     if (result.data) {
+      // console.log(result.data)
       setMenu(result.data.findSameKindFood)
     }
   }, [result])
 
   useEffect(() => {
-    if (reviews_result.loading === false) {
+    if (reviews_result.loading === false && reviews_result.data) {
+      // console.log(reviews_result)
       setReviews(reviews_result.data.findAllReviews)
     } 
   }, [reviews_result.data, reviews_result.loading])

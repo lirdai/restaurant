@@ -1,11 +1,15 @@
 // Library
+const http = require('http')
 const mongoose = require('mongoose')
-const { ApolloServer, UserInputError, gql } = require('apollo-server')
+const { ApolloServer, UserInputError, gql } = require('apollo-server-express')
+const express = require("express")
+const path = require("path")
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 require('dotenv').config()
 const Stripe = require('stripe')
 const { PubSub } = require('apollo-server')
+const cors = require('cors')
 
 // File
 const Food = require('./models/menu')
@@ -16,20 +20,19 @@ const Review = require('./models/review')
 
 
 
-if (process.argv.length < 4) {
-  console.log('Please provide the password as an argument: node mongo.js <password> <secret_key>')
-  process.exit(1)
-}
+// if (process.argv.length < 4) {
+//   console.log('Please provide the password as an argument: node mongo.js <password> <secret_key>')
+//   process.exit(1)
+// }
 
 
 const pubsub = new PubSub()
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 
-const password = process.argv[2]
+const password = process.env.MONGO_PASSWORD
+const JWT_SECRET = process.env.JWT_SECRET
 const url = `mongodb+srv://restaurant:${password}@cluster0.wtbvi.mongodb.net/restaurant?retryWrites=true&w=majority`
-const secret_key = process.argv[3]
-const JWT_SECRET = `${secret_key}`
 
 
 
@@ -592,6 +595,9 @@ const resolvers = {
 
 
 
+const PORT = 4000
+const app = express()
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
@@ -602,12 +608,21 @@ const server = new ApolloServer({
       const currentUser = await User.findById(decodedToken.id).populate('reservations_history').populate('reviews_history').populate('deliverys_history')
       return { currentUser }
     }
-  }
+  },
+  subscriptions: { path: '/graphql-ws' }
 })
 
+server.applyMiddleware({ app })
+const httpServer = http.createServer(app)
+server.installSubscriptionHandlers(httpServer)
 
+app.use(cors())
+app.use(express.static('build'))
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'build','index.html'))
+})
 
-server.listen().then(({ url, subscriptionsUrl }) => {
-  console.log(`Server ready at ${url}`)
-  console.log(`Subscriptions ready at ${subscriptionsUrl}`)
+httpServer.listen(PORT, () => {
+    console.log(`Server ready at ${PORT}${server.graphqlPath}`)
+    console.log(`Subscriptions ready at ${PORT}${server.subscriptionsPath}`)
 })

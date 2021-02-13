@@ -84,7 +84,7 @@ const DeliverSecond = () => {
         try {
             await createDeliver({  variables: { orderlist, price, ordered, email, phone, street, street2, city, postal_code } })
             await stripeCharge({ variables: { amount } })
-            console.log("done")
+            // console.log("done")
 
             var request = await stripe.createPaymentMethod({
                 type: 'card',
@@ -94,7 +94,7 @@ const DeliverSecond = () => {
     
             setPaymentMethodReq(request)
         } catch (error) {
-            console.log(error)
+            // console.log(error)
         }
 
         event.target.email.value = ''
