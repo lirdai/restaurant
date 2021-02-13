@@ -51,11 +51,11 @@ const authLink = setContext((_, { headers }) => {
 })
 
 const httpLink = new HttpLink({ 
-  uri: 'http://localhost:4000/graphql' 
+  uri: 'https://restaurant.daisywebdev.com/graphql' 
 })
 
 const wsLink = new WebSocketLink({
-  uri: `ws://localhost:4000/graphql-ws`,
+  uri: `wss://restaurant.daisywebdev.com/graphql-ws`,
   options: {
     reconnect: true
   }
